@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>TextReader</title>
+    <script async src="encoding/encoding.js"></script>
+    <style>
+        body{
+            min-height: 100vh;
+        }
+        #ddarea{
+            width:800px;
+            height:80px;
+            border:1px dotted #888;
+            margin: 1em auto;
+        }
+        #ddarea.ddefect{
+            border:1px solid #000;
+        }
+        #txtarea{
+            width: 800px;
+            height: 100%;
+            overflow: auto;
+            background: black;
+            color:white;
+            white-space: pre-wrap;
+            padding: 1em;
+            margin: auto;
+        }
+        #center{
+          width: 800px;
+          margin: 1px auto;
+          padding-top: 1px;
+        }
+    </style>
+    <script>
+    window.addEventListener( "DOMContentLoaded" , ()=> {
+ 
+        const ddarea = document.getElementById("ddarea");
+        const tarea = document.getElementById("txtarea");
+        const fnameSpan = document.getElementById("fnameSpan");
+        const encSpan = document.getElementById("encSpan");
+ 
+        let dropDisabled = false;
+ 
+            // ドラッグされたデータが有効かどうかチェック
+        const isValid = e => e.dataTransfer.types.indexOf("Files") >= 0 
+                                                       && e.dataTransfer.items.length<=1;
+ 
+        const ddEvent = {
+            "dragover" : e=>{
+                e.preventDefault(); // 既定の処理をさせない
+                e.stopPropagation(); // イベント伝播を止める
+ 
+                if( dropDisabled || !e.currentTarget.isEqualNode( ddarea ) ) {
+                        // ドロップ機能停止中または ドロップエリア外ならドロップを無効にする
+                    e.dataTransfer.dropEffect = "none";return;
+                }
+ 
+                if( !isValid(e) ){
+                        // 無効なデータがドラッグされたらドロップを無効にする
+                    e.dataTransfer.dropEffect = "none";return;
+                }
+                        // ドロップのタイプを変更
+                e.dataTransfer.dropEffect = "copy";
+                ddarea.classList.add("ddefect");
+            },
+            "dragleave" : e=>{
+                if( dropDisabled || !e.currentTarget.isEqualNode( ddarea ) ) {
+                    return;
+                }
+                e.stopPropagation(); // イベント伝播を止める
+                ddarea.classList.remove("ddefect");
+            },
+            "drop":e=>{
+                e.preventDefault(); // 既定の処理をさせない
+                e.stopPropagation(); // イベント伝播を止める
+ 
+                if(e.dataTransfer.files.length > 1) {
+                    tarea.textContent = "複数ファイルは対象外です";
+                    return;
+                }
+                dropDisabled = true;
+ 
+                loadData( e.dataTransfer.files[0] ).then( e => {
+                    ddarea.classList.remove("ddefect");
+                    dropDisabled = false;
+                });
+            }
+        };
+ 
+        /**
+         * ファイル読み込み
+         * @param targetFile
+         * @returns {Promise<unknown>}
+         */
+        const loadData = targetFile => {
+ 
+           return new Promise( (resolve, reject) => {
+ 
+               fnameSpan.textContent = `${targetFile.name}(${targetFile.size}Bytes)  <${targetFile.type}>`;
+               encSpan.textContent = "";
+               tarea.textContent ="";
+ 
+               let encode = null;
+ 
+               const reader = new FileReader();
+ 
+               reader.onload = ()=>{
+ 
+                   const u8 = new Uint8Array(reader.result);
+ 
+                   const encNames = ["UTF16", "ASCII" , "JIS" , "UTF8" , "EUCJP" , "SJIS", "UNICODE"];
+ 
+                   const enc =  Encoding.detect(u8);
+                   encSpan.textContent = enc;
+ 
+                   if( encNames.indexOf(enc) < 0 ){
+                       tarea.textContent = "ドロップされたファイルはテキストファイルでない可能性があります。";
+                   }else{
+                       tarea.textContent = Encoding.codeToString(  Encoding.convert(  u8 , "UNICODE"));
+                   }
+ 
+                   resolve(true);
+               };
+               reader.onerror = () =>{
+                   tarea.textContent = reader.error.message;
+                   resolve(false);
+               };
+ 
+               reader.readAsArrayBuffer( targetFile );
+           });
+        };
+ 
+        Object.keys( ddEvent ).forEach( e=>{
+            ddarea.addEventListener(e,ddEvent[e]);
+            document.body.addEventListener(e,ddEvent[e])
+        });
+ 
+    });
+    </script>
+</head>
+<body>
+<h1 id="center">Web Text Reader</h1> 
+<div id="ddarea" ><p>Drop it here</p></div>
+<p id="center">File Name : <span id="fnameSpan"></span><br>
+    Encode :<span id="encSpan"></span></p>
+<div id="txtarea"></div>
+<p id="encodejsError"></p>
+</body>
+</html>

@@ -1,0 +1,8 @@
+/backup/
+/test/
+/script/
+/config/
+*~
+.*.swp
+*.test
+*.out
