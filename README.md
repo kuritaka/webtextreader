@@ -12,3 +12,9 @@
 ## Screenshot
 
 ![Screenshot](images/screenshot.png)
+
+
+## Using
+
+* https://note.affi-sapo-sv.com/js-dandd-text-view.php
+* encoding.js
