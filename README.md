@@ -8,11 +8,14 @@
 * Supports Japanese character code text (UTF16, UTF8, EUCJP, SJIS etc)
 * I refer to the following site. (https://note.affi-sapo-sv.com/js-dandd-text-view.php)
 
+<br>
 
 ## Screenshot
 
-![Screenshot](images/screenshot.png)
+<img src="images/screenshot.png" width="600px">
 
+
+<br>
 
 ## Using
 
