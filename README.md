@@ -1,7 +1,7 @@
-# Web Test Reader
+# Web Text Reader
 
 
-## About Web Test Reader
+## About Web Text Reader
 
 * Drag and drop the text file to display it in your browser
 * I made this so that I can search the text file in the Mouse Dictionary of the browser extension.
